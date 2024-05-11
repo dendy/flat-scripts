@@ -1,0 +1,32 @@
+
+name: MyProject
+
+cflags:
+  - -std=c17
+
+cxxflags:
+  - -std=c++17
+
+macros:
+  MY_MACRO_FLAG:
+  MY_MACRO_STRING: i am macro string
+  MY_MACRO_INT: 42
+
+includes:
+  - libs/flat/debug/include
+  - libs/yaml-cpp/include
+  - $qt5/include        # template expansion
+  - $qt5/include/QtCore
+  - $qt5/include/QtGui
+
+ignore:
+  - '*.png'
+  - '*.mp4'
+
+files:
+  - libs/**                    # all files recursively
+  - apps/CMakeLists.txt        # single file with exact name
+  - $qt5/qml/**/RadialBlur.qml # template expansion
+
+exclude:
+  - libs/flat/debug/include/**
