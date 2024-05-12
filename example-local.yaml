@@ -1,2 +1,5 @@
+
+flat_scripts_dir: ~/projects/flat/src/scripts
+
 mappings:
-  qt5: /home/me/opt/qt-5.15.2-release
+  qt5: ~/opt/qt-5.15.2-release
