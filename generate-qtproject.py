@@ -12,6 +12,13 @@ import argparse
 import utils
 
 
+def user_expanded_value(value):
+	if value.startswith('~'):
+		return os.path.expanduser(value)
+	else:
+		return value
+
+
 def run(config_path, root_dir, project_dir, local_path=None, variants=None):
 	config_path = os.path.realpath(config_path)
 	root_dir = os.path.realpath(root_dir)
@@ -46,25 +53,35 @@ def run(config_path, root_dir, project_dir, local_path=None, variants=None):
 		if variant not in config_variants:
 			raise AttributeError(f'Invalid variant: {variants} Allowed variants: {config_variants}')
 
-	if not local_path is None:
-		with open(local_path, 'r') as f:
-			local = yaml.load(f, Loader=yaml.FullLoader)
-	else:
-		local = None
+	def get_local():
+		if not local_path is None:
+			with open(local_path, 'r') as f:
+				mappings = yaml.load(f, Loader=yaml.FullLoader)
+				config = mappings.pop('config', None)
+				if config is not None and type(config) != dict:
+					raise AttributeError('config in local conf must be a dict ({type(config)})')
+				mappings = {key: user_expanded_value(value) for key, value in mappings.items()}
+		else:
+			mappings = dict()
+			config = None
+		mappings['config_dir'] = os.path.dirname(config_path)
+		return config, mappings
+
+	local_config, local_mappings = get_local()
 
 	os.makedirs(project_dir, exist_ok=True)
 
 	def get_object(key, required):
 		nonlocal config
-		nonlocal local
+		nonlocal local_config
 		if required:
 			c = config[key]
 		else:
 			c = config.get(key)
-		if local is None:
+		if local_config is None:
 			l = None
 		else:
-			l = local.get(key)
+			l = local_config.get(key)
 		return c, l
 
 	def get_array(key, required):
@@ -153,32 +170,12 @@ def run(config_path, root_dir, project_dir, local_path=None, variants=None):
 		if not undef is None:
 			process_undef(undef, [])
 
-	def user_expanded_value(value):
-		if value.startswith('~'):
-			return os.path.expanduser(value)
-		else:
-			return value
-
-	if not local is None:
-		local_mappings = local.get('mappings')
-		if not local_mappings is None:
-			local_mappings = {key: user_expanded_value(value)
-					for key, value in local_mappings.items()}
-	else:
-		local_mappings = None
-
-	if local_mappings is None:
-		local_mappings = dict()
-	#print(f'config_path={config_path};')
-	local_mappings['config_dir'] = os.path.dirname(config_path)
-
 	def expand_path_mappings(expanded_path):
 		nonlocal local_mappings
-		if not local_mappings is None:
-			for key, value in local_mappings.items():
-				expanded_path = expanded_path.replace(f'${key}', value)
+		for key, value in local_mappings.items():
+			expanded_path = expanded_path.replace(f'${key}', value)
 		if '$' in expanded_path:
-			raise AttributeError(f'Path not fully expanded: {path}')
+			raise AttributeError(f'Path not fully expanded: {expanded_path}')
 		return expanded_path
 
 	def expand_path_norm(path):
@@ -200,7 +197,7 @@ def run(config_path, root_dir, project_dir, local_path=None, variants=None):
 		nonlocal root_dir
 		expanded_path = os.path.expanduser(path)
 		mapped_expanded_path = expand_path_mappings(expanded_path)
-		if not os.path.isabs(expanded_path):
+		if not os.path.isabs(mapped_expanded_path):
 			mapped_expanded_path = f'{root_dir}/{mapped_expanded_path}'
 		return os.path.realpath(mapped_expanded_path)
 
