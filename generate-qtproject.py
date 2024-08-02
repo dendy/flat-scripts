@@ -176,11 +176,13 @@ def run(config_path, root_dir, project_dir, local_path=None, variants=None):
 
 	def expand_path_mappings(expanded_path):
 		nonlocal local_mappings
+		mapped_expanded_path = expanded_path
 		for key, value in local_mappings.items():
-			expanded_path = expanded_path.replace(f'${key}', value)
-		if '$' in expanded_path:
-			raise AttributeError(f'Path not fully expanded: {expanded_path}')
-		return expanded_path
+			mapped_expanded_path = mapped_expanded_path.replace(f'${key}', value)
+		if '$' in mapped_expanded_path:
+			print(f'WARNING: Path not fully expanded: {expanded_path}', file=sys.stderr)
+			return expanded_path
+		return mapped_expanded_path
 
 	def expand_path_norm(path):
 		nonlocal root_dir
