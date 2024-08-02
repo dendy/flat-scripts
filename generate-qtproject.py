@@ -57,6 +57,10 @@ def run(config_path, root_dir, project_dir, local_path=None, variants=None):
 		if not local_path is None:
 			with open(local_path, 'r') as f:
 				mappings = yaml.load(f, Loader=yaml.FullLoader)
+				if mappings is None:
+					mappings = dict()
+				if type(mappings) != dict:
+					raise AttributeError(f'Invalid local config yaml: {type(mappings)}')
 				config = mappings.pop('config', None)
 				if config is not None and type(config) != dict:
 					raise AttributeError('config in local conf must be a dict ({type(config)})')
