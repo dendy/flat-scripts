@@ -519,6 +519,15 @@ def main():
 				suffix = f'{self.index : >{self.total_len}} / {self.total}    {perc_str : >6}%'
 			print(f'{self.prefix}: {suffix}', end='')
 
+	def is_text(mime_type, charset):
+		if charset == 'binary':
+			return False
+		if mime_type.startswith('text/'):
+			return True
+		if mime_type == 'application/json':
+			return True
+		return False
+
 	def scan_files():
 		nonlocal need_line_break
 
@@ -559,7 +568,7 @@ def main():
 					mime_type_count += 1
 				count_for_mime_type[mime_type] = mime_type_count
 				is_ignored = ignore_matcher.matches(local_path)
-				if mime_type.startswith('text/') and charset_value != 'binary' and not is_ignored:
+				if not is_ignored and is_text(mime_type, charset_value):
 					stat_list = stat_text_list
 				else:
 					stat_list = stat_rest_list
