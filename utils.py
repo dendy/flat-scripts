@@ -55,7 +55,10 @@ class PathMatcher:
 					return False
 
 				for wild_file in wild_list:
-					st_mode = os.stat(wild_file, follow_symlinks=False).st_mode
+					try:
+						st_mode = os.stat(wild_file, follow_symlinks=False).st_mode
+					except FileNotFoundError:
+						continue
 					if stat.S_ISDIR(st_mode): continue
 					if stat.S_ISLNK(st_mode):
 						print(f'link: {wild_file}')
