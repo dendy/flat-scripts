@@ -262,7 +262,7 @@ def run(config_path, root_dir, project_dir, local_path=None, variants=None):
 	if not excludes is None:
 		for exclude in excludes:
 			expanded_exclude = expand_path_norm(exclude)
-			print(f'exclude={exclude}; expanded_exclude={expanded_exclude};')
+			#print(f'exclude={exclude}; expanded_exclude={expanded_exclude};')
 			if os.path.isabs(expanded_exclude):
 				abs_excludes.append(expanded_exclude)
 			else:
@@ -294,7 +294,7 @@ def run(config_path, root_dir, project_dir, local_path=None, variants=None):
 				#print(f'abs_expanded_path={abs_expanded_path};')
 				files = [os.path.normpath(f'{expanded_path}/{file_path}') for file_path in utils.find_unique_paths(abs_expanded_path)]
 			else:
-				print('no path_matcher.prefixes')
+				#print('no path_matcher.prefixes')
 				files = path_matcher.files
 
 			total_count = 0

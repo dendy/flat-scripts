@@ -61,7 +61,7 @@ class PathMatcher:
 						continue
 					if stat.S_ISDIR(st_mode): continue
 					if stat.S_ISLNK(st_mode):
-						print(f'link: {wild_file}')
+						#print(f'link: {wild_file}')
 						wild_links.add(wild_file)
 						continue
 					if stat.S_ISCHR(st_mode): continue
@@ -71,7 +71,7 @@ class PathMatcher:
 					if root_dir is None:
 						wild_set.add(wild_file)
 					else:
-						print(f'add: {wild_file}')
+						#print(f'add: {wild_file}')
 						wild_set.add(os.path.relpath(wild_file, root_dir))
 				files_set.update(wild_set)
 			elif os.path.isdir(abs_subpath):
